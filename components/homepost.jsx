@@ -1,180 +1,259 @@
-const postsPerPage = 2;
-const getDataPost = async (label) => {
-    const url = `https://dev-testing-website.blogspot.com/feeds/posts/default/-/${label}?alt=json`;
-    const storedDataKey = `ppRR${label}`;
-    const storedData = localStorage.getItem(storedDataKey);
+const btnEpNum = postData[0];
+const sourceType = postData[1];
 
-    if (storedData) {
-        return JSON.parse(storedData);
-    } else {
-        try {
-            const response = await axios.get(url);
-            const data = response.data.feed.entry;
-            localStorage.setItem(storedDataKey, JSON.stringify(data));
-            return data;
-        } catch (error) {
-            console.error('Error:', error);
-            throw error;
-        }
+const showrecomendmenu = () => {
+    console.log('show recomend menu')
+}
+
+const reportError = () => {
+    console.log('report error')
+}
+
+const updatecheck = () => {
+    console.log('update check')
+}
+
+const downloadVideo = () => {
+    const iframe = document.getElementById("iframeplayer");
+
+    if (iframe.src.includes("drive.google.com")) {
+        const id = iframe.src.split("/")[5];
+        location.href = `https://drive.google.com/u/0/uc?id=${id}&export=download`;
     }
-};
+}
 
-const postBtnSDM = async (label, setData, setPage) => {
-    try {
-        const data = await getDataPost(label);
-        setData(data);
-        setPage(0);
-    } catch (error) {
-        console.error('Error:', error);
-    }
-};
-
-const randomPost = (data) => {
-    if (data.length > 0) {
-        const randomIndex = Math.floor(Math.random() * data.length);
-        const postLink = data[randomIndex].link[4].href;
-        window.open(postLink, '_blank');
-    }
-};
-
-const prevPost = (page, setPage) => {
-    if (page > 0) {
-        setPage(page - 1);
-    }
-};
-
-const nextPost = (page, setPage, dataLength) => {
-    if ((page + 1) * postsPerPage < dataLength) {
-        setPage(page + 1);
-    }
-};
-
-const GeneratePostComponent = React.memo((props) => {
-    const { data, page } = props;
-    return generatePost(data, page);
-});
-
-const generatePost = (data, page) => {
-    const startIndex = page * postsPerPage;
-    const endIndex = Math.min(startIndex + postsPerPage, data.length);
-    return data.slice(startIndex, endIndex).map((post, index) => {
-        const key = index.toString();
-        const title = post.title.$t;
-        let score = -1;
-        let ep = 'No Item';
-        let type = 'No Item';
-        let view = 'No Item';
-        let postLink = post.link[4].href;
-        let imageLink = 'No Item';
-
-        post.category.forEach((category) => {
-            const term = category.term;
-            if (term === 'Sub' || term === 'Dub') {
-                type = term;
-            } else if (term.startsWith('Ep')) {
-                ep = term;
-            } else if (!isNaN(term)) {
-                score = Number(term);
-            } else if (term === 'Movie' || term === 'Ova' || term === 'TV') {
-                view = term;
-            }
+const openiframe = (event) => {
+    if (event.target.matches('.playbutton')) {
+        // Re-enable all buttons
+        const buttons = document.querySelectorAll('.playbutton');
+        buttons.forEach((button) => {
+            button.disabled = false;
         });
 
-        const regex = /<div[^>]*class="separator"[^>]*>[\s\S]*?<img[^>]*src="([^"]*)"/;
-        const match = post.content.$t.match(regex);
-        if (match) {
-            imageLink = match[1];
-        }
+        // Disable the clicked button
+        const value = event.target.textContent;
+        openlink(value);
+        console.log(value);
+        event.target.disabled = true;
+    }
+}
 
-        return (
-            <div key={key} className='hentry play c:hover-eee'>
-                <a className='block ofc relative poster r3 oh' href={postLink} title={title}>
-                    <img alt={title} className='ar-2sx h-max w-max' loading='lazy' src={imageLink} />
-                    <div className='absolute b-0 p-y2x6b0 ep fs-13 c-eee blr5 trr8'>
-                        <span>{ep}</span>
-                    </div>
-                    <div className='absolute t-0 p-y2x6b0 sc fs-13 c-eee tlr5 brr8'>
-                        <div className='rating-prc'>
-                            <div className='rtp'>
-                                <div className='rtb'>
-                                    <span style={{ width: `${score * 10}%` }}></span>
-                                </div>
-                            </div>
-                            <div className='num' content={score}>{score}</div>
-                        </div>
-                    </div>
-                    <div className='absolute b-0 r-0 fs-13 c-eee brr5 tlr8 dir ttu'>
-                        {type && <span className={type.toLowerCase()}>{type}</span>}
-                        {view && <span className={view.toLowerCase()}>{view}</span>}
-                    </div>
-                </a>
-            </div>
-        );
-    });
+const openlink = (value) => {
+    let iframe = document.getElementById("iframeplayer");
+    document.getElementById("eptitleplace").textContent = `EP ${value}`;
+
+    if (sourceType === "yt") {
+        iframe.src = `https://www.youtube.com/embed/${videoLinks[value - 1]}`;
+    } else if (sourceType === "gdrive") {
+        iframe.src = `https://drive.google.com/file/d/${videoLinks[value - 1]}/preview`;
+    }
+}
+
+
+function generateButton(btnEpNum) {
+    let buttons = [];
+    for (let i = 0; i < btnEpNum; i++) {
+        if (i == 0) {
+            buttons.push(<button key={i} className="playbutton btn btn-primary" disabled={true} onClick={openiframe}>{i + 1}</button>);
+        } else {
+            buttons.push(<button key={i} className="playbutton btn btn-primary" onClick={openiframe}>{i + 1}</button>);
+        }
+    }
+    return buttons;
+}
+
+
+function showMore() {
+    let hidecomment = document.querySelector('#comments');
+    const info = document.querySelector('#info');
+    const animeBtn2 = document.getElementById('animebtn2');
+
+    if (info.style.display === 'block') {
+        info.style.display = 'none';
+        animeBtn2.textContent = 'More info';
+        hidecomment.style.margin = '1.66rem 0';
+    } else {
+        info.style.display = 'block';
+        animeBtn2.textContent = 'Less info';
+        hidecomment.style.margin = '0';
+    }
 };
 
-const PostContainer = () => {
-    const [data, setData] = React.useState([]);
-    const [page, setPage] = React.useState(0);
-    const url = 'https://dev-testing-website.blogspot.com/feeds/posts/default?alt=json&max-results=25';
-    const storedDataKey = 'pppDatapostrr';
-    const storedData = localStorage.getItem(storedDataKey);
+function PlayerSection() {
+    let postTitle = document.querySelector('.info .title').textContent;
+    let postStatus = document.querySelector('#postDStatus').textContent;
+
+    const followedPosts = JSON.parse(localStorage.getItem('rioAnimePostData')) || [];
+    const [isFollowed, setIsFollowed] = React.useState(followedPosts.includes(postTitle));
+
+    const followToggle = () => {
+        const followedPosts = JSON.parse(localStorage.getItem('rioAnimePostData')) || [];
+
+        if (followedPosts.includes(postTitle)) {
+            followedPosts.splice(followedPosts.indexOf(postTitle), 1);
+            localStorage.setItem('rioAnimePostData', JSON.stringify(followedPosts));
+            setIsFollowed(false);
+            console.log("Removed");
+        } else {
+            followedPosts.push(postTitle);
+            localStorage.setItem('rioAnimePostData', JSON.stringify(followedPosts));
+            setIsFollowed(true);
+            console.log("Saved");
+        }
+    }
+
+    let isRealoded = false;
+    const reloadIframe = () => {
+        const notif = document.getElementById('notifprompt');
+        const iframe = document.getElementById('iframeplayer');
+
+        if (!isRealoded) {
+            const tempSrc = iframe.src;
+            iframe.src = "";
+            notif.style.display = 'block';
+            notif.textContent = "Reloading";
+            iframe.src = tempSrc;
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 2000);
+            isRealoded = true;
+            setTimeout(() => {
+                isRealoded = false;
+            }, 10000);
+        } else {
+            notif.style.display = 'block';
+            notif.textContent = "Don't Spam";
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 2000);
+        }
+    }
+
+    function postGenres() {
+        const genresSpan = document.getElementById('postDGenre');
+        const genreLinks = genresSpan.getElementsByTagName('a');
+        const genres = Array.from(genreLinks).map((link, index) => (
+            <a key={index} href={link.href} rel={link.rel}>
+                {link.textContent}
+            </a>
+        ));
+
+        return <>{genres}</>;
+    }
+
+    function stream() {
+        let streamType = "";
+
+        if (sourceType == "yt") {
+            streamType = "YouTube Stream";
+        } else if (sourceType == "gdrive") {
+            streamType = "GDrive Stream";
+        } else {
+            streamType = "Video Stream";
+        }
+
+        return streamType;
+    }
 
     React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await Promise.all([getDataPost('Sub'), getDataPost('Dub'), getDataPost('Movie')]);
-                if (storedData) {
-                    setData(JSON.parse(storedData));
-                } else {
-                    const response = await axios.get(url);
-                    const responseData = response.data.feed.entry;
-                    setData(responseData);
-                    localStorage.setItem(storedDataKey, JSON.stringify(responseData));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-
-        fetchData();
+        openlink(1);
     }, []);
 
     return (
-        <>
-            <div className='mb-10 flex jcsb'>
-                <h2 className='lh-2 c-fff fw-500'>Recently updated</h2>
-                <div className='flex aic'>
-                    <div className='flex aic tabs'>
-                        <a className='tablinks' onClick={() => { setData(JSON.parse(storedData)); setPage(0); }}>
-                            All
-                        </a>
-                        <a className='tablinks' onClick={() => postBtnSDM('Sub', setData, setPage)}>
-                            Sub
-                        </a>
-                        <a className='tablinks' onClick={() => postBtnSDM('Dub', setData, setPage)}>
-                            Dub
-                        </a>
-                        <a className='tablinks' onClick={() => postBtnSDM('Movie', setData, setPage)}>
-                            Movie
-                        </a>
-                        <a className='tablinks' onClick={() => randomPost(data)}>
-                            Random
-                        </a>
-                        <a className='tablinks' onClick={() => prevPost(page, setPage)}>
-                            <i className="fa-solid fa-angle-left"></i>
-                        </a>
-                        <a className='tablinks' onClick={() => nextPost(page, setPage, data.length)}>
-                            <i className="fa-solid fa-angle-right"></i>
-                        </a>
+        <div className="playerpage">
+            <div className="subpart eptitle">
+                <div id="eptitle"><span id="eptitleplace">EP 1</span><span className="altsourcenotif">
+                    {sourceType === 'yt' || sourceType === 'gdrive' ? 'External Player' : 'Internal Player'}
+                </span></div>
+                <div id="toprightplayer">
+                    <i className="fa-solid fa-repeat">
+                        <span className="tooltiptext">Switch</span>
+                    </i>
+                    <i className="fa-solid fa-lightbulb">
+                        <span className="tooltiptext">Lights</span>
+                    </i>
+                    <i className="fa-solid fa-download" onClick={downloadVideo}>
+                        <span className="tooltiptext">Download</span>
+                    </i>
+                    <i className="fa-solid fa-wand-sparkles">
+                        <span className="tooltiptext">Autoplay</span>
+                    </i>
+                    <i onClick={null} id="nextbtn" className="glyphicon glyphicon-forward" style={{ color: 'gray', cursor: 'default' }}>
+                        <span className="tooltiptext">Next ep</span>
+                    </i>
+                </div>
+            </div>
+            <div id="iframecontainer" className={sourceType === 'yt' ? 'responYt' : ''}>
+                <iframe id="iframeplayer" allowFullScreen={true} scrolling="no" src="" style={{ minHeight: '0px' }}></iframe>
+                {sourceType === 'gdrive' && (
+                    <div id="overlay" onClick={(e) => {
+                        e.preventDefault();
+                    }}></div>
+                )}
+            </div>
+
+            <div id="lowerplayerpage">
+                <div id="aligncenter">
+                    <div id="streamtypecontainer">
+                        <div id="streamtype">{stream()}</div>
+                        <div id="showrecomendbtn" onClick={showrecomendmenu} style={{ display: 'inline-block' }}>
+                            <i className="glyphicon glyphicon-cog"></i>
+                            <span id="changetext">Change</span>
+                        </div>
+                        <div id="sharebtn">
+                            <i className="glyphicon glyphicon-share-alt"></i>
+                            <span id="shareText" style={{ display: 'inline' }}>Share</span>
+                        </div>
+                        <div id="openreport" onClick={reportError} style={{ display: 'block' }}>
+                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <span className="reportText">Report</span>
+                        </div>
+                        <div id="reloadbtn" style={{ display: 'block' }} onClick={reloadIframe}>
+                            <i className="fa fa-refresh" aria-hidden="true"></i>
+                            <span className="reportText">Reload</span>
+                        </div>
+                        <div id="screenshotbtn" style={{ display: 'block' }}>
+                            <i className="glyphicon glyphicon-camera"></i>
+                        </div>
+                        <div id="widescreenbtn">
+                            <i className="glyphicon glyphicon-fullscreen"></i>
+                        </div>
+                    </div>
+                    <a id="animebtn" href="/anime/50203" style={{ display: 'inline' }}>
+                        <svg stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="25" width="25" id="foldersvg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </a>
+                    <span className="animetitle">{postTitle}</span>
+                    <button id="followbtn" onClick={followToggle} style={{ display: 'inline' }}>
+                        <i className="fa-solid fa-bell"></i> {isFollowed ? 'Followed' : 'Follow'}
+                    </button>
+                    <br />
+                    <div id="animeimage"></div>
+                    <span id="notice" style={{ display: 'none' }}>
+                        <br /><br /><br />Try clear cache &amp; make sure your browser extension not block javascript<br /><br /><br />
+                    </span>
+                </div>
+                <div id="epslistplace" onClick={openiframe}>
+                    {generateButton(btnEpNum)}
+                </div>
+                <div id="flexbottom">
+                    <div id="bottomleft">
+                        <span id="genres">Genres:{postGenres()}</span><br />
+                        <span id="status">Status : {postStatus}</span>
+                        <span id="animeinfobottom" style={{ display: 'block' }}><a id="animebtn2" onClick={showMore}>More info</a></span>
+                    </div>
+                    <div className="epsavailable">
+                        Ep total : <span id="epsavailable">{btnEpNum}</span> <a onClick={updatecheck} id="updatebtn"><i className="glyphicon glyphicon-refresh"></i></a>
+                        <div id="playercountdown" style={{ color: 'gray' }}>Next: Unknown</div>
                     </div>
                 </div>
             </div>
-            <div className='grid gtc-raf g-var hfeed'><GeneratePostComponent data={data} page={page} /></div>
-        </>
-    );
-};
+            <div id="notifprompt">Don't Spam</div>
+        </div>
+    )
+}
 
-const post = document.getElementById('testPostLang1');
-const root = ReactDOM.createRoot(post);
-root.render(<PostContainer />);
+const container = document.getElementById('playerSection');
+const root = ReactDOM.createRoot(container);
+root.render(<PlayerSection />);
