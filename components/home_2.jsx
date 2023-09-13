@@ -110,7 +110,7 @@ const generatePost = (data, page) => {
 const PostContainer = () => {
     const [data, setData] = React.useState([]);
     const [page, setPage] = React.useState(0);
-    const url = 'https://dev-testing-website.blogspot.com/feeds/posts/default?alt=json&max-results=25';
+    const url = 'https://www.rioanimeplay.xyz/feeds/posts/default?alt=json&max-results=25';
     const storedDataKey = 'pppDatapostrr';
 
     React.useEffect(() => {
