@@ -1,4 +1,4 @@
-const postsPerPage = 30;
+const postsPerPage = 2;
 const getDataPost = async (label) => {
     const url = `https://www.rioanimeplay.xyz/feeds/posts/default/-/${label}?alt=json`;
     const storedDataKey = `ppRR${label}`;
@@ -87,39 +87,30 @@ const generatePost = (data, page) => {
         }
 
         return (
-            <div key={key} className='hentry play c:hover-eee'>
-                <a className='block ofc relative poster r3 oh' href={postLink} title={title}>
-                    <img alt={title} className='ar-2sx h-max w-max' loading='lazy' src={imageLink} />
-                    <div className='absolute b-0 p-y2x6b0 ep fs-13 c-eee blr5 trr8'>
-                        <span>{ep}</span>
-                    </div>
-                    <div className='absolute t-0 p-y2x6b0 sc fs-13 c-eee tlr5 brr8'>
-                        <div className='rating-prc'>
-                            <div className='rtp'>
-                                <div className='rtb'>
-                                    <span style={{ width: `${score * 10}%` }}></span>
-                                </div>
-                            </div>
-                            <div className='num' content={score}>{score}</div>
+            <>
+                <li>
+                    <a href={postLink} title={title}>
+                        <div class="searchimg">
+                            <img class="resultimg" alt="" src={imageLink} />
+                            <div class="rating"><i class="fa-solid fa-star" style={{ color: '#ffcb00c7' }}></i> {score}</div>
+                            <div class="type">{type.toUpperCase()}</div>
                         </div>
+                    </a>
+                    <div class="details">
+                        <span class="name"><a href={postLink} title={title}>{title}</a></span>
+                        <span class="infotext">{ep.toUpperCase()}</span>
                     </div>
-                    <div className='absolute b-0 r-0 fs-13 c-eee brr5 tlr8 dir ttu'>
-                        {type && <span className={type.toLowerCase()}>{type}</span>}
-                        {view && <span className={view.toLowerCase()}>{view}</span>}
-                    </div>
-                </a>
-                <h3 class="clamp oh tac mt-8">
-                    <a class="fs-md fw-400 c-aba" href={title}>{title}</a>
-                </h3>
-            </div>
+                </li>
+            </>
         );
     });
-};
+
+}
 
 const PostContainer = () => {
     const [data, setData] = React.useState([]);
     const [page, setPage] = React.useState(0);
-    const url = 'https://www.rioanimeplay.xyz/feeds/posts/default?alt=json&max-results=25';
+    const url = 'https://dev-testing-website.blogspot.com/feeds/posts/default?alt=json&max-results=25';
     const storedDataKey = 'pppDatapostrr';
 
     React.useEffect(() => {
@@ -169,7 +160,7 @@ const PostContainer = () => {
                     </div>
                 </div>
             </div>
-            <div className='grid gtc-raf g-var hfeed'><GeneratePostComponent data={data} page={page} /></div>
+            <div id="resultplace"><ul id="resultload" class="searchresult"><GeneratePostComponent data={data} page={page} /></ul></div>
         </>
     );
 };
